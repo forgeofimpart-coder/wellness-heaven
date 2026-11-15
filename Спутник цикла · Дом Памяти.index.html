@@ -1,0 +1,340 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Спутник цикла · Дом Памяти</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=EB+Garamond:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --clay:#9C4A2F; --clay-soft:#C6795E; --ink:#2B2622; --grey:#6B615A;
+    --cream:#F4ECE4; --cream-2:#EDE2D6; --soft:#FBF7F2; --line:#D9C9BC;
+    --winter:#7A3B45; --spring:#6E7B52; --summer:#C6923B; --autumn:#A5563E;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{
+    background:
+      radial-gradient(120% 80% at 50% -10%, #efe4d7 0%, var(--cream) 55%, #ece0d2 100%);
+    color:var(--ink);
+    font-family:"EB Garamond",Georgia,serif;
+    -webkit-font-smoothing:antialiased;
+    display:flex; justify-content:center;
+    padding:34px 18px 60px;
+    min-height:100vh;
+  }
+  .wrap{width:100%; max-width:560px}
+  .eyebrow{
+    font-family:"EB Garamond",Georgia,serif; letter-spacing:.34em; text-transform:uppercase;
+    font-size:11px; color:var(--clay-soft); font-weight:500; text-align:center; margin-bottom:10px;
+  }
+  h1{
+    font-family:"Cormorant Garamond",Georgia,serif; font-weight:600; font-size:46px;
+    text-align:center; margin:0 0 4px; letter-spacing:.5px; line-height:1;
+  }
+  .sub{ text-align:center; color:var(--grey); font-style:italic; font-size:16px; margin:0 0 22px }
+
+  /* dial */
+  .dialwrap{ display:flex; flex-direction:column; align-items:center; }
+  svg{ touch-action:none; display:block; max-width:100%; }
+  .arc{ fill:none; stroke-width:16; stroke-linecap:round; opacity:.9 }
+  .tick{ stroke:#00000022; stroke-width:1 }
+  .marker{ fill:#fffdfb; stroke:var(--ink); stroke-width:2.5;
+    filter:drop-shadow(0 2px 4px rgba(0,0,0,.25)); cursor:grab }
+  .marker:active{ cursor:grabbing }
+  .dayNum{ font-family:"Cormorant Garamond",serif; font-weight:600; fill:var(--ink) }
+  .dayLbl{ font-family:"EB Garamond",serif; fill:var(--grey); letter-spacing:.28em; text-transform:uppercase }
+
+  /* controls */
+  .len{ display:flex; align-items:center; gap:12px; justify-content:center; margin:6px 0 20px; color:var(--grey); font-size:15px }
+  .len button{
+    font-family:inherit; font-size:18px; width:32px; height:32px; border-radius:50%;
+    border:1px solid var(--line); background:var(--soft); color:var(--clay); cursor:pointer; line-height:1;
+  }
+  .len button:hover{ background:var(--cream-2) }
+  .len b{ color:var(--ink); font-weight:600; min-width:26px; display:inline-block; text-align:center }
+
+  /* result card */
+  .card{
+    background:linear-gradient(180deg,var(--soft),#fff);
+    border:1px solid var(--line); border-radius:18px; overflow:hidden;
+    box-shadow:0 18px 40px -26px rgba(60,30,15,.45);
+    transition:opacity .35s ease;
+  }
+  .card.fade{ opacity:0 }
+  .band{ height:6px; width:100% }
+  .cardpad{ padding:24px 26px 26px }
+  .phaseRow{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap }
+  .phase{ font-family:"Cormorant Garamond",serif; font-size:30px; font-weight:600; margin:0; line-height:1.05 }
+  .season{ font-size:13px; letter-spacing:.26em; text-transform:uppercase; color:var(--clay); font-weight:500 }
+  .archetype{ font-style:italic; color:var(--grey); font-size:16px; margin:2px 0 0 }
+  .state{ font-size:18px; margin:14px 0 4px; line-height:1.5 }
+
+  .energy{ display:flex; align-items:center; gap:8px; margin:14px 0 18px }
+  .energy .lbl{ font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--grey) }
+  .dot{ width:11px; height:11px; border-radius:50%; border:1px solid var(--line); background:transparent }
+  .dot.on{ border-color:transparent }
+
+  .block{ border-top:1px solid var(--line); padding-top:14px; margin-top:14px }
+  .block .k{ font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--clay); font-weight:500; margin-bottom:5px }
+  .block .v{ font-size:16.5px; line-height:1.6; color:var(--ink) }
+
+  .qwrap{ background:var(--cream); border-radius:14px; padding:16px 18px; margin-top:18px; position:relative }
+  .qwrap .k{ font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--clay); font-weight:500; margin-bottom:6px }
+  .q{ font-family:"Cormorant Garamond",serif; font-style:italic; font-size:22px; line-height:1.4; margin:0; color:var(--ink) }
+  .newq{ margin-top:12px; font-family:"EB Garamond",serif; font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+    background:none; border:none; color:var(--clay); cursor:pointer; padding:0; border-bottom:1px solid var(--clay-soft) }
+  .newq:hover{ color:var(--ink) }
+
+  .foot{ text-align:center; color:var(--grey); font-size:12.5px; margin-top:20px; line-height:1.6 }
+  .foot b{ color:var(--clay); font-weight:600; letter-spacing:.2em; text-transform:uppercase; font-size:11px }
+
+  @media (max-width:420px){
+    h1{ font-size:38px } .phase{ font-size:26px } .q{ font-size:20px }
+    .cardpad{ padding:20px 20px 22px }
+  }
+  @media (prefers-reduced-motion:reduce){ .card{ transition:none } .marker{ transition:none } }
+</style>
+
+<div class="wrap">
+  <div class="eyebrow">Wellness Heaven · Дом Памяти</div>
+  <h1>Спутник цикла</h1>
+  <p class="sub">твой день — твоя фаза — что телу нужно сейчас</p>
+
+  <div class="dialwrap">
+    <svg id="dial" width="300" height="300" viewBox="0 0 300 300" role="slider"
+         tabindex="0" aria-label="День цикла" aria-valuemin="1" aria-valuemax="28" aria-valuenow="1">
+      <g id="arcs"></g>
+      <g id="ticks"></g>
+      <text id="cDay" class="dayNum" x="150" y="150" text-anchor="middle" font-size="52"></text>
+      <text id="cLbl" class="dayLbl" x="150" y="178" text-anchor="middle" font-size="10">день цикла</text>
+      <circle id="mk" class="marker" r="12" cx="150" cy="26"></circle>
+    </svg>
+  </div>
+
+  <div class="len">
+    длина цикла
+    <button id="lenMinus" aria-label="Уменьшить длину цикла">−</button>
+    <b id="lenVal">28</b>
+    <button id="lenPlus" aria-label="Увеличить длину цикла">+</button>
+    дней
+  </div>
+
+  <div class="card" id="card">
+    <div class="band" id="band"></div>
+    <div class="cardpad">
+      <div class="phaseRow">
+        <div>
+          <p class="phase" id="phase"></p>
+          <p class="archetype" id="arch"></p>
+        </div>
+        <div class="season" id="season"></div>
+      </div>
+      <p class="state" id="state"></p>
+
+      <div class="energy">
+        <span class="lbl">Энергия</span>
+        <span class="dot" data-i="1"></span><span class="dot" data-i="2"></span>
+        <span class="dot" data-i="3"></span><span class="dot" data-i="4"></span>
+        <span class="dot" data-i="5"></span>
+      </div>
+
+      <div class="block"><div class="k">Что с телом</div><div class="v" id="body"></div></div>
+      <div class="block"><div class="k">Питание</div><div class="v" id="food"></div></div>
+      <div class="block"><div class="k">Ритуал дня</div><div class="v" id="ritual"></div></div>
+      <div class="block"><div class="k">Тело · практика</div><div class="v" id="practice"></div></div>
+
+      <div class="qwrap">
+        <div class="k">Вопрос себе</div>
+        <p class="q" id="question"></p>
+        <button class="newq" id="newq">другой вопрос</button>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot"><b>без астрологии</b><br>всё на физиологии цикла и твоём голосе — прототип для клуба и лид-магнита</p>
+</div>
+
+<script>
+(function(){
+  var PHASES = {
+    winter:{ name:"Менструация", season:"Зима", arch:"Старица", energy:1, color:"var(--winter)",
+      state:"Тишина и завершение. Тело просит уединения, тепла и покоя.",
+      body:"Гормоны на минимуме, эндометрий обновляется. Это не слабость — это перерождение почти без рубца. Тебе физиологически нужно больше отдыха, чем в другие дни.",
+      food:"Тепло и восполнение: гречка, свёкла, тёмная зелень, тёплые супы, вода. Ничего холодного и жёсткого.",
+      ritual:"Грелка на живот, брюшное дыхание, ранний сон. Разреши себе право ничего не делать.",
+      practice:"Поза ребёнка, мягкие скрутки лёжа, шавасана. Без нагрузки и без «через силу».",
+      q:["От чего я готова освободиться в этом цикле?",
+         "Что моё тело весь месяц терпело молча?",
+         "В чём я нуждаюсь прямо сейчас — и могу ли дать это себе?",
+         "Что для меня значит право ничего не делать?",
+         "Если бы кровь могла что-то унести, о чём бы я попросила её?",
+         "Где я забываю про отдых и потом плачу за это?"] },
+    spring:{ name:"Фолликулярная фаза", season:"Весна", arch:"Дева", energy:4, color:"var(--spring)",
+      state:"Возвращение сил. Приходят идеи, тело просыпается, хочется начинать.",
+      body:"Растёт эстроген, поднимается энергия и ясность мысли. Тело готово к движению, обучению и новому.",
+      food:"Лёгкость и рост: свежие овощи, зелень, проростки, белок. Поддержка эстрогена — лён, гранат, брокколи.",
+      ritual:"Записать замыслы, спланировать месяц, написать намерение из состояния — образ будущего, а не борьба.",
+      practice:"Динамика, Сурья Намаскар, пробуждающая растяжка. Тело хочет двигаться.",
+      q:["Какой замысел просится проявиться через меня?",
+         "Что я хочу создать в этом цикле?",
+         "Какой маленький шаг приблизит меня к желаемому сегодня?",
+         "Какие мысли обо мне больше не служат мне?",
+         "Чему я говорю «да» в этом месяце?",
+         "Что по-настоящему вдохновляет меня прямо сейчас?"] },
+    summer:{ name:"Овуляция", season:"Лето", arch:"Королева", energy:5, color:"var(--summer)",
+      state:"Пик проявленности. Магнетизм, тяга к общению и желание показываться.",
+      body:"Пик эстрогена и всплеск лютеинизирующего гормона. Максимум энергии, притягательности и лёгкости в контакте.",
+      food:"Клетчатка и антиоксиданты: ягоды, овощи, зелень, лёгкие белки. Поддержи печень в метаболизме эстрогена.",
+      ritual:"Живые встречи, важные разговоры, проявление. Лучшее время заявлять о себе, приглашать и продавать.",
+      practice:"Сильные раскрывающие практики, воздушка, танец. Тело хочет быть увиденным.",
+      q:["Где я готова заявить о себе громче?",
+         "Что я хочу подарить миру сейчас?",
+         "В чём я прямо сейчас чувствую свою силу?",
+         "С кем важно поговорить, пока во мне столько энергии?",
+         "Что я откладывала из страха быть замеченной?",
+         "Как выглядит моё «показываюсь» без извинений?"] },
+    autumn:{ name:"Лютеиновая фаза", season:"Осень", arch:"Царица", energy:2, color:"var(--autumn)",
+      state:"Спад и сбор. Обостряются чувства, растут границы, внимание идёт внутрь.",
+      body:"Растёт прогестерон, повышается чувствительность и температура тела. ПМС — не поломка, а сигнал: где тебе небезопасно.",
+      food:"Стабилизация сахара: киноа, батат, гречка; магний — тёмный шоколад, тыквенные семечки; тёплое. Меньше кофеина и соли.",
+      ritual:"Завершать дела, наводить порядок, обозначать границы, беречь ресурс и не сливать наполненное.",
+      practice:"Мягкая активность, растяжка, восстановительная йога, спокойное дыхание.",
+      q:["Что я хочу завершить в этом цикле?",
+         "Где мне важно вернуть себе границу?",
+         "Что меня раздражает — и о чём это раздражение честно говорит?",
+         "От чего я готова отпустить?",
+         "Где я предаю себя, соглашаясь на «надо»?",
+         "Как я могу позаботиться о себе сегодня бережнее?"] }
+  };
+
+  var length = 28, day = 1, qi = 0;
+  var TAU = Math.PI*2, CX=150, CY=150, R=124;
+
+  function bounds(L){
+    var mEnd = Math.max(4, Math.round(L*0.18));
+    var fEnd = Math.round(L*0.46);
+    var oEnd = Math.round(L*0.57);
+    if(fEnd<=mEnd) fEnd=mEnd+1;
+    if(oEnd<=fEnd) oEnd=fEnd+1;
+    if(oEnd>=L) oEnd=L-1;
+    return {mEnd:mEnd, fEnd:fEnd, oEnd:oEnd};
+  }
+  function phaseOf(d){
+    var b=bounds(length);
+    if(d<=b.mEnd) return "winter";
+    if(d<=b.fEnd) return "spring";
+    if(d<=b.oEnd) return "summer";
+    return "autumn";
+  }
+  function angleForDay(d){ return -Math.PI/2 + ((d-0.5)/length)*TAU; }
+  function pt(a,r){ return [CX+Math.cos(a)*r, CY+Math.sin(a)*r]; }
+  function arcPath(d0,d1,r){
+    var a0=-Math.PI/2 + ((d0-1)/length)*TAU;
+    var a1=-Math.PI/2 + (d1/length)*TAU;
+    var p0=pt(a0,r), p1=pt(a1,r);
+    var large = (a1-a0)>Math.PI ? 1:0;
+    return "M "+p0[0].toFixed(2)+" "+p0[1].toFixed(2)+" A "+r+" "+r+" 0 "+large+" 1 "+p1[0].toFixed(2)+" "+p1[1].toFixed(2);
+  }
+
+  function drawArcs(){
+    var b=bounds(length);
+    var segs=[[1,b.mEnd,"var(--winter)"],[b.mEnd+1,b.fEnd,"var(--spring)"],
+              [b.fEnd+1,b.oEnd,"var(--summer)"],[b.oEnd+1,length,"var(--autumn)"]];
+    var g=document.getElementById("arcs"); g.innerHTML="";
+    segs.forEach(function(s){
+      var p=document.createElementNS("http://www.w3.org/2000/svg","path");
+      p.setAttribute("d",arcPath(s[0],s[1],R));
+      p.setAttribute("class","arc"); p.setAttribute("stroke",s[2]);
+      g.appendChild(p);
+    });
+    var t=document.getElementById("ticks"); t.innerHTML="";
+    for(var d=1; d<=length; d++){
+      var a=angleForDay(d), i=pt(a,R-9), o=pt(a,R+9);
+      var ln=document.createElementNS("http://www.w3.org/2000/svg","line");
+      ln.setAttribute("x1",i[0].toFixed(1)); ln.setAttribute("y1",i[1].toFixed(1));
+      ln.setAttribute("x2",o[0].toFixed(1)); ln.setAttribute("y2",o[1].toFixed(1));
+      ln.setAttribute("class","tick"); t.appendChild(ln);
+    }
+  }
+
+  function render(changed){
+    var p=PHASES[phaseOf(day)];
+    var mk=document.getElementById("mk");
+    var a=angleForDay(day), m=pt(a,R);
+    mk.setAttribute("cx",m[0].toFixed(2)); mk.setAttribute("cy",m[1].toFixed(2));
+    mk.setAttribute("fill","#fffdfb");
+    document.getElementById("cDay").textContent=day;
+    var dial=document.getElementById("dial");
+    dial.setAttribute("aria-valuenow",day);
+    dial.setAttribute("aria-valuetext","День "+day+", "+p.name);
+
+    var card=document.getElementById("card");
+    function fill(){
+      document.getElementById("band").style.background=p.color;
+      document.getElementById("phase").textContent=p.name;
+      document.getElementById("season").textContent=p.season;
+      document.getElementById("arch").textContent="архетип · "+p.arch;
+      document.getElementById("state").textContent=p.state;
+      document.getElementById("body").textContent=p.body;
+      document.getElementById("food").textContent=p.food;
+      document.getElementById("ritual").textContent=p.ritual;
+      document.getElementById("practice").textContent=p.practice;
+      var dots=document.querySelectorAll(".dot");
+      dots.forEach(function(dt){
+        var on = (+dt.dataset.i)<=p.energy;
+        dt.classList.toggle("on",on);
+        dt.style.background = on ? p.color : "transparent";
+      });
+      if(changed!=="qonly"){ qi = day % p.q.length; }
+      document.getElementById("question").textContent=p.q[qi % p.q.length];
+    }
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+    if(changed==="day" && !reduce){
+      card.classList.add("fade");
+      setTimeout(function(){ fill(); card.classList.remove("fade"); }, 180);
+    } else { fill(); }
+  }
+
+  // interaction: drag on ring
+  var dragging=false;
+  function dayFromEvent(e){
+    var svg=document.getElementById("dial");
+    var rect=svg.getBoundingClientRect();
+    var scale=300/rect.width;
+    var x=(e.clientX-rect.left)*scale - CX;
+    var y=(e.clientY-rect.top)*scale - CY;
+    var ang=Math.atan2(y,x)+Math.PI/2;
+    if(ang<0) ang+=TAU;
+    var d=Math.round((ang/TAU)*length + 0.5);
+    if(d<1) d=1; if(d>length) d=length;
+    return d;
+  }
+  function onDown(e){ dragging=true; var d=dayFromEvent(e); if(d!==day){day=d;render("day");} else render("day"); e.preventDefault(); }
+  function onMove(e){ if(!dragging) return; var d=dayFromEvent(e); if(d!==day){ day=d; render("day"); } }
+  function onUp(){ dragging=false; }
+  var dial=document.getElementById("dial");
+  dial.addEventListener("pointerdown",onDown);
+  window.addEventListener("pointermove",onMove);
+  window.addEventListener("pointerup",onUp);
+  dial.addEventListener("keydown",function(e){
+    if(e.key==="ArrowRight"||e.key==="ArrowUp"){ day=day%length+1; render("day"); e.preventDefault(); }
+    if(e.key==="ArrowLeft"||e.key==="ArrowDown"){ day=(day-2+length)%length+1; render("day"); e.preventDefault(); }
+  });
+
+  // length controls
+  function setLen(L){
+    L=Math.max(24,Math.min(34,L)); length=L;
+    if(day>length) day=length;
+    document.getElementById("lenVal").textContent=L;
+    document.getElementById("dial").setAttribute("aria-valuemax",L);
+    drawArcs(); render("day");
+  }
+  document.getElementById("lenMinus").onclick=function(){ setLen(length-1); };
+  document.getElementById("lenPlus").onclick=function(){ setLen(length+1); };
+  document.getElementById("newq").onclick=function(){
+    var p=PHASES[phaseOf(day)]; qi=(qi+1)%p.q.length; render("qonly");
+  };
+
+  drawArcs(); render("init");
+})();
+</script>
